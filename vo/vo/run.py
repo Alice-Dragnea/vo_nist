@@ -64,7 +64,7 @@ class Odometry(Node):
             stream_rgb(self.imageFrame)
 
         # Detect Features
-        kp, des = detect_features(self.imageFrame, 100)
+        kp, des = detect_features(self.imageFrame, 1000)
 
         # Stream Detected Features
         if stream_keypoints:
