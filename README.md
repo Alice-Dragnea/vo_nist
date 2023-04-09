@@ -15,6 +15,6 @@ Plot Results:
 python3 visualize path_to_out.npy  
    
 Desc:  
-visualize.py - plots x, y, z trajectory when given an inpute file path  
+visualize.py - plots x, y, z trajectory when given an input file path  
 voLib.py - helper functions  
 run.py - node file  
