@@ -113,7 +113,7 @@ def visualize_trajectory(trajectory):
     plt.show()
 
 def main(args):
-    if args is not None:
+    if len(args) > 0:
         data = np.load(args[0])
     else:
         data = np.load("out.npy")
