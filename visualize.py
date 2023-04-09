@@ -111,6 +111,7 @@ def visualize_trajectory(trajectory):
     D3_plt.view_init(45, azim=30)
     plt.tight_layout()
     plt.show()
+    # plt.savefig('SampleTrajectory.png')
 
 def main(args):
     if len(args) > 0:

@@ -18,3 +18,9 @@ Desc:
 visualize.py - plots x, y, z trajectory when given an input file path  
 voLib.py - helper functions  
 run.py - node file  
+
+Below is a sample trajectory result:  
+  
+<p align="center">  
+<img src="SampleTrajectory.png" width=67% height=67%/>  
+</p>  
