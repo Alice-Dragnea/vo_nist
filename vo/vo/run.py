@@ -110,6 +110,8 @@ def main(args=None):
         rclpy.spin(odom_node)
     except:
         # Save Data
+        # This is such a terrible way of doing this, but it works
+        # TODO: maybe try something more sensible one day
         odom_node.save_data()
         odom_node.destroy_node()
         rclpy.shutdown()
