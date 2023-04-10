@@ -17,8 +17,9 @@ stream_keypoints = False
 stream_flann = False
 skip_match = False
 skip_estimate = False
+print_perturb = True
 print_pose = False
-save_pose = True
+save_pose = False
 
 class Odometry(Node):
     def __init__(self):
@@ -92,7 +93,14 @@ class Odometry(Node):
                 # Build Trajectory
                 coordinates = np.array([[self.pose[0, 3], self.pose[1, 3], self.pose[2, 3]]])
                 self.trajectory = np.concatenate((self.trajectory, coordinates.T), axis=1)
+                
+                # Print Perturb
+                if print_perturb:
+                    print(pose_perturb)
 
+        # Print Pose
+        if print_pose:
+            print(self.pose)
 
         # Save Frame Data for Next Frame
         self.kp_last = kp
