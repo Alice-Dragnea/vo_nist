@@ -54,7 +54,11 @@ class Odometry(Node):
         self.imageFrame = self.br.imgmsg_to_cv2(image_msg)
 
         # Calculate Pose
-        self.calc_pose()
+        try: # don't update if something fails (likely not enough feature points)
+            self.calc_pose()
+        except:
+            pass
+            
 
     def callback_depth(self, pc_msg):
         self.pointCloudFrame = pc_msg
@@ -123,9 +127,6 @@ def main(args=None):
         odom_node.save_data()
         odom_node.destroy_node()
         rclpy.shutdown()
-
-    odom_node.destroy_node()
-    rclpy.shutdown()
 
 if __name__ == "__main__":
     main()
