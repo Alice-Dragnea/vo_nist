@@ -48,6 +48,9 @@ class Odometry(Node):
         self.publish_tf_broadcaster = TransformBroadcaster(self)
 
         # Defining Data
+        self.rx = np.array([[1, 0, 0],
+                            [0, 1, 0)],
+                            [0, 0, 1]])
         self.trajectory = np.zeros((3, 1))
         self.br = CvBridge()
         self.pointCloudFrame = None
@@ -75,6 +78,15 @@ class Odometry(Node):
 
     def callback_depth(self, pc_msg):
         self.pointCloudFrame = pc_msg
+
+    def rotate_x(self, rmat, tvec):
+        rx = np.array([[1, 0, 0],
+                       [0, np.cos(np.deg2rad(rmat[1, 1])), -1*np.sin(np.deg2rad(rmat[1, 2]))],
+                       [0, np.sin(np.deg2rad(rmat[2, 1])), np.cos(np.deg2rad([2, 2]))]])
+        rmat = rx @ rmat
+        tvec = rx @ tvec
+
+        return rmat, tvec
 
     def calc_pose(self):
         # Stream RGB Video
@@ -133,8 +145,8 @@ class Odometry(Node):
 
         msg = PoseStamped()
         msg.pose.position.x = self.pose[0, 3]
-        msg.pose.position.y = self.pose[2, 3]
-        msg.pose.position.z = self.pose[1, 3]
+        msg.pose.position.y = self.pose[1, 3]
+        msg.pose.position.z = self.pose[2, 3]
         msg.header.frame_id = "map"
         msg.pose.orientation.x = -q[0]
         msg.pose.orientation.y = -q[1]
@@ -144,8 +156,8 @@ class Odometry(Node):
 
         t = TransformStamped()
         t.transform.translation.x = self.pose[0, 3]
-        t.transform.translation.y = self.pose[2, 3]
-        t.transform.translation.z = self.pose[1, 3]
+        t.transform.translation.y = self.pose[1, 3]
+        t.transform.translation.z = self.pose[2, 3]
         t.header.stamp = self.get_clock().now().to_msg()
         t.header.frame_id = "map"
         t.child_frame_id = "vehicle_frame"
