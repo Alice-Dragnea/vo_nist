@@ -23,8 +23,8 @@ stream_keypoints = False
 stream_flann = False
 skip_match = False
 skip_estimate = False
-print_perturb = True
-print_pose = False
+print_perturb = False
+print_pose = True
 save_pose = False
 
 class Odometry(Node):
@@ -125,15 +125,16 @@ class Odometry(Node):
         self.imageFrame_last = self.imageFrame
 
     def save_data(self):
-        np.save("out", self.trajectory)
+        if save_pose:
+            np.save("out", self.trajectory)
 
     def pub_pose(self):
         q = tf_transformations.quaternion_from_matrix(self.pose)
 
         msg = PoseStamped()
         msg.pose.position.x = self.pose[0, 3]
-        msg.pose.position.y = self.pose[1, 3]
-        msg.pose.position.z = self.pose[2, 3]
+        msg.pose.position.y = self.pose[2, 3]
+        msg.pose.position.z = self.pose[1, 3]
         msg.header.frame_id = "map"
         msg.pose.orientation.x = -q[0]
         msg.pose.orientation.y = -q[1]
@@ -143,8 +144,8 @@ class Odometry(Node):
 
         t = TransformStamped()
         t.transform.translation.x = self.pose[0, 3]
-        t.transform.translation.y = self.pose[1, 3]
-        t.transform.translation.z = self.pose[2, 3]
+        t.transform.translation.y = self.pose[2, 3]
+        t.transform.translation.z = self.pose[1, 3]
         t.header.stamp = self.get_clock().now().to_msg()
         t.header.frame_id = "map"
         t.child_frame_id = "vehicle_frame"
