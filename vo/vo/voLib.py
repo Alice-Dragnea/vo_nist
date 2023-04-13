@@ -6,16 +6,6 @@ import array
 
 from sensor_msgs_py import point_cloud2
 
-
-def rotate_x(rmat, tvec):
-    rx = np.array([[1, 0, 0],
-                    [0, np.cos(np.deg2rad(rmat[1, 1])), -1*np.sin(np.deg2rad(rmat[1, 2]))],
-                    [0, np.sin(np.deg2rad(rmat[2, 1])), np.cos(np.deg2rad([2, 2]))]])
-    rmat = rx @ rmat
-    tvec = rx @ tvec
-
-    return rmat, tvec
-
 def estimate_motion(matches, kp_last, kp, k, pointCloud):
     # Declare lists and arrays
     rmat = np.eye(3)
@@ -48,11 +38,7 @@ def estimate_motion(matches, kp_last, kp, k, pointCloud):
         # Ransac and solve
         _, rvec, tvec, _ = cv2.solvePnPRansac(np.vstack(valid_points), np.array(valid_pxl_list).astype(np.float32), k, None)
 
-        # Convert to Rodrigues
         rmat, _ = cv2.Rodrigues(rvec)
-
-        # Correct rotation
-        rmat, tvec = rotate_x(rmat, tvec)
 
     # Pack
     pose_perturb = np.eye(4)

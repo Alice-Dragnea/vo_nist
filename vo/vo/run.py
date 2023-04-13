@@ -24,7 +24,7 @@ stream_flann = False
 skip_match = False
 skip_estimate = False
 print_perturb = False
-print_pose = True
+print_pose = False
 save_pose = False
 
 class Odometry(Node):
@@ -48,9 +48,6 @@ class Odometry(Node):
         self.publish_tf_broadcaster = TransformBroadcaster(self)
 
         # Defining Data
-        self.rx = np.array([[1, 0, 0],
-                            [0, 1, 0)],
-                            [0, 0, 1]])
         self.trajectory = np.zeros((3, 1))
         self.br = CvBridge()
         self.pointCloudFrame = None
@@ -66,7 +63,7 @@ class Odometry(Node):
     def callback_rgb(self, image_msg):
         self.imageFrame = self.br.imgmsg_to_cv2(image_msg)
 
-        # Calculate Pose
+        Calculate Pose
         try: # don't update if something fails (likely not enough feature points)
             self.calc_pose()
         except:
@@ -74,19 +71,9 @@ class Odometry(Node):
 
         # Publish Pose
         self.pub_pose()
-            
 
     def callback_depth(self, pc_msg):
         self.pointCloudFrame = pc_msg
-
-    def rotate_x(self, rmat, tvec):
-        rx = np.array([[1, 0, 0],
-                       [0, np.cos(np.deg2rad(rmat[1, 1])), -1*np.sin(np.deg2rad(rmat[1, 2]))],
-                       [0, np.sin(np.deg2rad(rmat[2, 1])), np.cos(np.deg2rad([2, 2]))]])
-        rmat = rx @ rmat
-        tvec = rx @ tvec
-
-        return rmat, tvec
 
     def calc_pose(self):
         # Stream RGB Video
@@ -141,29 +128,30 @@ class Odometry(Node):
             np.save("out", self.trajectory)
 
     def pub_pose(self):
-        q = tf_transformations.quaternion_from_matrix(self.pose)
+        pose = self.pose
+        q = tf_transformations.quaternion_from_matrix(pose)
 
         msg = PoseStamped()
-        msg.pose.position.x = self.pose[0, 3]
-        msg.pose.position.y = self.pose[1, 3]
-        msg.pose.position.z = self.pose[2, 3]
+        msg.pose.position.x = pose[0, 3]
+        msg.pose.position.y = pose[2, 3]
+        msg.pose.position.z = pose[1, 3]
         msg.header.frame_id = "map"
         msg.pose.orientation.x = -q[0]
-        msg.pose.orientation.y = -q[1]
-        msg.pose.orientation.z = -q[2]
+        msg.pose.orientation.y = -q[2]
+        msg.pose.orientation.z = -q[1]
         msg.pose.orientation.w = q[3]
         self.publish_pose.publish(msg)
 
         t = TransformStamped()
-        t.transform.translation.x = self.pose[0, 3]
-        t.transform.translation.y = self.pose[1, 3]
-        t.transform.translation.z = self.pose[2, 3]
+        t.transform.translation.x = pose[0, 3]
+        t.transform.translation.y = pose[2, 3]
+        t.transform.translation.z = pose[1, 3]
         t.header.stamp = self.get_clock().now().to_msg()
         t.header.frame_id = "map"
         t.child_frame_id = "vehicle_frame"
         t.transform.rotation.x = -q[0]
-        t.transform.rotation.y = -q[1]
-        t.transform.rotation.z = -q[2]
+        t.transform.rotation.y = -q[2]
+        t.transform.rotation.z = -q[1]
         t.transform.rotation.w = q[3]
         self.publish_tf_broadcaster.sendTransform(t)
 
