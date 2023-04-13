@@ -5,11 +5,17 @@
 import rclpy
 import cv2
 import numpy as np
+import sys
+import time
 
 from rclpy.node import Node
 from sensor_msgs.msg import Image, PointCloud2
+from geometry_msgs.msg import PoseStamped, TransformStamped, Point
 from cv_bridge import CvBridge
 from voLib import *
+
+import tf_transformations
+from tf2_ros import TransformBroadcaster
 
 # Debug flags
 stream_raw = False
@@ -37,6 +43,10 @@ class Odometry(Node):
             self.callback_depth,
             10)
 
+        # Publishers
+        self.publish_pose = self.create_publisher(PoseStamped, 'camera_pose_vo', 10)
+        self.publish_tf_broadcaster = TransformBroadcaster(self)
+
         # Defining Data
         self.trajectory = np.zeros((3, 1))
         self.br = CvBridge()
@@ -58,6 +68,9 @@ class Odometry(Node):
             self.calc_pose()
         except:
             pass
+
+        # Publish Pose
+        self.pub_pose()
             
 
     def callback_depth(self, pc_msg):
@@ -113,6 +126,33 @@ class Odometry(Node):
 
     def save_data(self):
         np.save("out", self.trajectory)
+
+    def pub_pose(self):
+        q = tf_transformations.quaternion_from_matrix(self.pose)
+
+        msg = PoseStamped()
+        msg.pose.position.x = self.pose[0, 3]
+        msg.pose.position.y = self.pose[1, 3]
+        msg.pose.position.z = self.pose[2, 3]
+        msg.header.frame_id = "map"
+        msg.pose.orientation.x = -q[0]
+        msg.pose.orientation.y = -q[1]
+        msg.pose.orientation.z = -q[2]
+        msg.pose.orientation.w = q[3]
+        self.publish_pose.publish(msg)
+
+        t = TransformStamped()
+        t.transform.translation.x = self.pose[0, 3]
+        t.transform.translation.y = self.pose[1, 3]
+        t.transform.translation.z = self.pose[2, 3]
+        t.header.stamp = self.get_clock().now().to_msg()
+        t.header.frame_id = "map"
+        t.child_frame_id = "vehicle_frame"
+        t.transform.rotation.x = -q[0]
+        t.transform.rotation.y = -q[1]
+        t.transform.rotation.z = -q[2]
+        t.transform.rotation.w = q[3]
+        self.publish_tf_broadcaster.sendTransform(t)
 
 def main(args=None):
     rclpy.init(args=args)
