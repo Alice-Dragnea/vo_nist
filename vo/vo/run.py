@@ -63,7 +63,7 @@ class Odometry(Node):
     def callback_rgb(self, image_msg):
         self.imageFrame = self.br.imgmsg_to_cv2(image_msg)
 
-        Calculate Pose
+        # Calculate Pose
         try: # don't update if something fails (likely not enough feature points)
             self.calc_pose()
         except:
