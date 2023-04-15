@@ -20,19 +20,20 @@ def generate_launch_description():
             launch_arguments={
                 'pointcloud.enable': 'true',
                 'align_depth.enable': 'true',
-                'depth_module.profile': '848,480,60',
-                'rgb_camera.profile': '848,480,60',
+                # 'depth_module.profile': '480,270,60',
+                # 'rgb_camera.profile': '424,240,60',
         		'pointcloud.ordered_pc': 'true',
                 'rgb_camera.enable_auto_exposure': 'false',
                 'depth.enable_auto_exposure': 'false',
                 # 'depth_module.hdr_enable': 'true',
                 # 'enable_sync': 'true',
-                'json_file_path': [get_package_share_directory('vo') ,'/config/rs_vio.json'],
+                'json_file_path': [get_package_share_directory('vo') ,'/rs_vio.json'],
                 }.items(),
         ),
-        # Node(
-        #     package='casadi_vio',
-        #     executable='depth_from_pc.py',
-        # ),
+        Node(
+            package='vo',
+            executable='odom',
+        ),
         #Node(package='casadi_vio', executable='feature_points.py', output='screen')
+
     ])

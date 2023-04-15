@@ -56,8 +56,8 @@ class Odometry(Node):
         self.des_last = None
         self.imageFrame_last = None
         self.pose = np.eye(4)
-        self.k = np.array([[611.2769775390625, 0, 434.48028564453125],
-                           [0, 609.7720336914062, 237.57313537597656],
+        self.k = np.array([[615.8260498046875, 0, 327.4524230957031],
+                           [0, 616.07373046875, 242.58750915527344],
                            [0, 0, 1]], dtype=np.float32)
 
     def callback_rgb(self, image_msg):
@@ -165,7 +165,8 @@ def main(args=None):
         # Save Data
         # This is such a terrible way of doing this, but it works
         # TODO: maybe try something more sensible one day
-        odom_node.save_data()
+        if save_pose:
+            odom_node.save_data()
         odom_node.destroy_node()
         rclpy.shutdown()
 
