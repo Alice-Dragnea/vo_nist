@@ -27,13 +27,11 @@ def generate_launch_description():
                 'depth.enable_auto_exposure': 'false',
                 # 'depth_module.hdr_enable': 'true',
                 # 'enable_sync': 'true',
-                'json_file_path': [get_package_share_directory('vo') ,'/rs_vio.json'],
+                'json_file_path': [get_package_share_directory('vo_nist') ,'/rs_vio.json'],
                 }.items(),
         ),
         Node(
-            package='vo',
+            package='vo_nist',
             executable='odom',
         ),
-        #Node(package='casadi_vio', executable='feature_points.py', output='screen')
-
     ])
