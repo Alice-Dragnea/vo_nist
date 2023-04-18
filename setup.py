@@ -21,7 +21,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'odom = vo_nist:main',
+            'odom = vo_nist.run:main',
         ],
     },
 )
