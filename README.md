@@ -2,10 +2,10 @@ ROS VERSION: ROS2 Humble
 PYTHON VERSION: 3.0+  
   
 Installation:  
-cd ~/ros2_ws/src
-git clone git@github.com:Alice-Dragnea/vo_nist.git
-cd ~/ros2_ws
-colcon build --packages-select vo_nist
+cd ~/ros2_ws/src  
+git clone git@github.com:Alice-Dragnea/vo_nist.git  
+cd ~/ros2_ws  
+colcon build --packages-select vo_nist  
   
 Start Node:  
 ros2 run vo_nist odom 
