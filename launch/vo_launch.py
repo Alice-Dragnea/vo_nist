@@ -19,7 +19,7 @@ def generate_launch_description():
             PythonLaunchDescriptionSource([get_package_share_directory('realsense2_camera') ,'/launch/rs_launch.py']),
             launch_arguments={
                 'pointcloud.enable': 'true',
-                'align_depth.enable': 'true',
+                # 'align_depth.enable': 'true',
                 # 'depth_module.profile': '480,270,60',
                 # 'rgb_camera.profile': '424,240,60',
         		'pointcloud.ordered_pc': 'true',
@@ -34,4 +34,11 @@ def generate_launch_description():
             package='vo_nist',
             executable='odom',
         ),
-    ])
+        Node(
+            package='image_proc',
+            output='screen',
+            executable='image_proc',
+            namespace='camera/color',
+            remappings=[('image', 'image_raw')],
+        ),
+   ])
