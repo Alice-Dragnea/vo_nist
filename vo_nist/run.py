@@ -7,6 +7,7 @@ import cv2
 import numpy as np
 import sys
 import time
+import traceback
 
 from rclpy.node import Node
 from sensor_msgs.msg import Image, PointCloud2
@@ -25,7 +26,7 @@ skip_match = False
 skip_estimate = False
 print_perturb = False
 print_pose = False
-save_pose = False
+save_pose = True
 
 class Odometry(Node):
     def __init__(self):
@@ -42,10 +43,16 @@ class Odometry(Node):
             '/camera/depth/color/points',
             self.callback_depth,
             10)
+        self.subscription = self.create_subscription(
+            PoseStamped,
+            '/drone',
+            self.callback_qualisys,
+            10)
 
         # Publishers
         self.publish_pose = self.create_publisher(PoseStamped, 'camera_pose_vo', 10)
         self.publish_tf_broadcaster = TransformBroadcaster(self)
+        self.publish_scaledQualisys = self.create_publisher(PoseStamped, 'drone_scaled', 10)
 
         # Defining Data
         self.trajectory = np.zeros((3, 1))
@@ -56,8 +63,8 @@ class Odometry(Node):
         self.des_last = None
         self.imageFrame_last = None
         self.pose = np.eye(4)
-        self.k = np.array([[615.8260498046875, 0, 327.4524230957031],
-                           [0, 616.07373046875, 242.58750915527344],
+        self.k = np.array([[607.79150390625, 0, 319.30987548828125],
+                           [0, 608.1211547851562, 236.9514617919922],
                            [0, 0, 1]], dtype=np.float32)
 
     def callback_rgb(self, image_msg):
@@ -67,7 +74,7 @@ class Odometry(Node):
         try: # don't update if something fails (likely not enough feature points)
             self.calc_pose()
         except:
-            pass
+            traceback.print_exc()
 
         # Publish Pose
         self.pub_pose()
@@ -134,7 +141,7 @@ class Odometry(Node):
         msg = PoseStamped()
         msg.pose.position.x = pose[0, 3]
         msg.pose.position.y = pose[2, 3]
-        msg.pose.position.z = pose[1, 3]
+        msg.pose.position.z = -1 * pose[1, 3]
         msg.header.frame_id = "map"
         msg.pose.orientation.x = -q[0]
         msg.pose.orientation.y = -q[2]
@@ -145,7 +152,7 @@ class Odometry(Node):
         t = TransformStamped()
         t.transform.translation.x = pose[0, 3]
         t.transform.translation.y = pose[2, 3]
-        t.transform.translation.z = pose[1, 3]
+        t.transform.translation.z = -1 * pose[1, 3]
         t.header.stamp = self.get_clock().now().to_msg()
         t.header.frame_id = "map"
         t.child_frame_id = "vehicle_frame"
@@ -154,6 +161,18 @@ class Odometry(Node):
         t.transform.rotation.z = -q[1]
         t.transform.rotation.w = q[3]
         self.publish_tf_broadcaster.sendTransform(t)
+
+    def callback_qualisys(self, data):
+        msg = PoseStamped()
+        msg.pose.position.x = data.pose.position.x / 1000
+        msg.pose.position.y = data.pose.position.y / 1000
+        msg.pose.position.z = data.pose.position.z / 1000
+        msg.header.frame_id = "map"
+        msg.pose.orientation.x = data.pose.orientation.x
+        msg.pose.orientation.y = data.pose.orientation.y
+        msg.pose.orientation.z = data.pose.orientation.z
+        msg.pose.orientation.w = data.pose.orientation.w
+        self.publish_scaledQualisys.publish(msg)
 
 def main(args=None):
     rclpy.init(args=args)
@@ -169,6 +188,7 @@ def main(args=None):
             odom_node.save_data()
         odom_node.destroy_node()
         rclpy.shutdown()
+        traceback.print_exc()
 
 if __name__ == "__main__":
     main()
